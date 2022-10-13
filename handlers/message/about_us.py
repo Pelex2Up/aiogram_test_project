@@ -15,11 +15,11 @@ async def about_us(callback_query: types.CallbackQuery):
 @dp.callback_query_handler(lambda x: x.data == 'phone_number')
 async def about_us_phone(callback_query: types.CallbackQuery):
     await callback_query.message.edit_text(text=f"Наш номер телефона: +121983258923",
-                                           reply_markup=await back_kb())
+                                           reply_markup=await back_kb(target="about_us"))
 
 
 @dp.callback_query_handler(lambda x: x.data == 'adress')
 async def about_us_adress(callback_query: types.CallbackQuery):
     await callback_query.message.edit_text(text=f"Наши адреса: \nг. Минск, ул. Хзкакаятоулица, д.12\n"
                                                 f"г.Минск, ул. Тожехзкакаяулица, д.125",
-                                           reply_markup=await back_kb())
+                                           reply_markup=await back_kb(target="about_us"))

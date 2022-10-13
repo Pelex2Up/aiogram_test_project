@@ -9,4 +9,4 @@ async def about_us(callback_query: types.CallbackQuery):
     await callback_query.message.edit_text(text=f"Сегодня в меню ничего нет, но "
                                                 f"вы потыкайте разработчика, мб появится :)\n"
                                                 f"База данных с блюдами еще не заполнена.",
-                                           reply_markup=await back_kb())
+                                           reply_markup=await back_kb(target="main_menu"))
