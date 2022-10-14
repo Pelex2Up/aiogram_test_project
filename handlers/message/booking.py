@@ -2,7 +2,7 @@ from aiogram import types
 from aiogram.types import CallbackQuery
 
 from loader import dp, bot
-from keyboards.user.booking import booking_kb
+from keyboards.user.booking import booking_kb, booking_modify_kb, edit_data_kb
 from aiogram_calendar import SimpleCalendar, simple_cal_callback
 from keyboards.user.back import back_kb
 from states.booking import BookingStates
@@ -127,8 +127,37 @@ async def booking_peoples(message: types.Message, state=FSMContext):
         time = booking_data['time']
         number_people = booking_data['num_of_people']
         await message.delete()
-        await message.answer(f'Столик успешно забронирован на имя {f_name} {l_name}.\nДата: {date}, время: {time}.\n'
+        await message.answer(f'Бронь на имя {f_name} {l_name}.\nДата: {date}, время: {time}.\n'
                              f'Количество человек: {number_people}.\n'
-                             f'Для возвращения в главное меню, нажмите "Назад".',
-                             reply_markup=await back_kb(target='main_menu'))
-        await state.finish()
+                             f'Всё верно?',
+                             reply_markup=await booking_modify_kb())
+
+
+@dp.callback_query_handler(lambda x: x.data == 'commit_booking_data', state=BookingStates.num_of_people)
+async def commit_booking(callback_query: types.CallbackQuery, state: FSMContext):
+    await state.finish()
+    await callback_query.message.edit_text(text='Регистрация прошла успешно',
+                                           reply_markup=await back_kb(target='main_menu'))
+
+
+@dp.callback_query_handler(lambda x: x.data == 'edit_booking_data', state='*')
+async def edit_data(callback_query: types.CallbackQuery, state: FSMContext):
+    booking_data = await state.get_data()
+    f_name = booking_data['f_name']
+    l_name = booking_data['l_name']
+    date = booking_data['date']
+    time = booking_data['time']
+    number_people = booking_data['num_of_people']
+    await callback_query.message.edit_text(text='Что вы хотите изменить?',
+                                           reply_markup=await edit_data_kb(f_name, l_name, date, time, number_people)
+                                          )
+
+
+@dp.callback_query_handler(lambda x: x.data == 'confirm_booking', state='*')
+async def confirm_booking(call: types.CallbackQuery, state: FSMContext):
+    booking_data = await state.get_data()
+    f_name, l_name, date, time, num = booking_data.values()
+    await call.message.edit_text(text=f'Бронь на имя {f_name} {l_name}.\nДата: {date}, время: {time}.\n'
+                                 f'Количество человек: {num}.\n'
+                                 f'Всё верно?',
+                                 reply_markup=await booking_modify_kb())

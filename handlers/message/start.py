@@ -1,7 +1,7 @@
 from aiogram import types
 
 from keyboards.user.start import start_kb
-from loader import dp
+from loader import dp, bot
 
 
 @dp.message_handler(commands=['start'])
