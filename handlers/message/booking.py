@@ -120,8 +120,3 @@ async def booking_peoples(message: types.Message, state=FSMContext):
                              f'Для возвращения в главное меню, нажмите "Назад".',
                              reply_markup=await back_kb(target='main_menu'))
         await state.finish()
-
-
-
-
-
