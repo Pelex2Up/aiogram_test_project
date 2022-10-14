@@ -44,7 +44,7 @@ async def date_booking(message: types.Message, state: FSMContext):
                          reply_markup=await SimpleCalendar().start_calendar())
 
 
-def is_valid_date(date: str):
+def is_valid_date(date: str) -> bool:
     today_date = datetime.now().strftime("%d/%m/%Y")
     today_date = today_date.split('/')
     date = date.split('/')
@@ -60,7 +60,7 @@ def is_valid_date(date: str):
 
 @dp.callback_query_handler(simple_cal_callback.filter(), state=BookingStates.date)
 async def verify_selection(callback_query: CallbackQuery, callback_data: dict, state: FSMContext):
-    selected, date = await SimpleCalendar().process_selection(callback_query, callback_data)
+    selected, date = await SimpleCalendar().process_selection(callback_query, callback_data['text'])
     if selected:
         await callback_query.message.answer(f'Бронирование на {date.strftime("%d/%m/%Y")}')
     result_select_date = date.strftime("%d/%m/%Y")
@@ -98,7 +98,7 @@ async def booking_time(message: types.Message, state=FSMContext):
 
 @dp.message_handler(state=BookingStates.num_of_people)
 async def booking_peoples(message: types.Message, state=FSMContext):
-    if int(message.text) > 6:
+    if 0 > int(message.text) > 6:
         await message.answer('Количество человек должно быть не больше 6 за один стол.')
     else:
         await state.update_data(num_of_people=message.text)
@@ -108,7 +108,7 @@ async def booking_peoples(message: types.Message, state=FSMContext):
         date = booking_data['date']
         time = booking_data['time']
         number_people = booking_data['num_of_people']
-        await message.answer(f'Столик успешно забронирован на имя {f_name} {l_name}. Дата: {date}, время: {time}. '
+        await message.answer(f'Столик успешно забронирован на имя {f_name} {l_name}.\nДата: {date}, время: {time}.\n'
                              f'Количество человек: {number_people}.\n'
                              f'Для возвращения в главное меню, нажмите "Назад".',
                              reply_markup=await back_kb(target='main_menu'))
