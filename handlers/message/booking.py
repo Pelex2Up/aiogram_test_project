@@ -7,7 +7,6 @@ from aiogram_calendar import SimpleCalendar, simple_cal_callback
 from keyboards.user.back import back_kb
 from states.booking import BookingStates
 from aiogram.dispatcher import FSMContext
-from aiogram.dispatcher.filters import Text
 from datetime import datetime
 
 
@@ -86,7 +85,7 @@ async def verify_selection(callback_query: CallbackQuery, callback_data: dict, s
             await BookingStates.next()
             await BookingStates.time.set()
             await callback_query.message.edit_text('На какое время хотите забронировать столик?\n'
-                                                'Время вводится в формате Часы:Минуты')
+                                                   'Время вводится в формате Часы:Минуты')
 
 
 async def is_valid_time(message_time) -> bool:
