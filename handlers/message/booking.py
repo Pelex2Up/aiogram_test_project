@@ -18,12 +18,24 @@ async def booking(callback_query: types.CallbackQuery):
                                            reply_markup=await booking_kb())
 
 
+@dp.callback_query_handler(lambda x: x.data == 'cancel', state='*')
+async def cancel_fsm(callback_query: types.CallbackQuery, state: FSMContext):
+    current_state = await state.get_data()
+    if current_state is None:
+        return
+    else:
+        await state.finish()
+    await callback_query.message.edit_text(text=f"Бронирование осуществляется за сутки. Максимальное количество человек"
+                                                f" за один стол: 6.",
+                                           reply_markup=await booking_kb())
+
+
 @dp.callback_query_handler(lambda x: x.data == 'create_booking')
 async def start_booking(callback_query: types.CallbackQuery):
     await callback_query.message.delete()
     await bot.send_message(callback_query.from_user.id,
                            text='Введите Ваше имя:',
-                           reply_markup=await back_kb(target='booking'))
+                           reply_markup=await back_kb(target='cancel'))
     await BookingStates.f_name.set()
 
 
