@@ -10,4 +10,3 @@ async def start_user(message: types.Message):
     await message.answer(text=f"Привет, {message.from_user.full_name}!\n"
                               f"Тут идет какой-то приветственный текст от маркетологов xD.",
                          reply_markup=await start_kb())
-

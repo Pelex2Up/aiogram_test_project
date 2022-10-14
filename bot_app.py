@@ -1,5 +1,8 @@
 import datetime
+
+import asyncio
 from aiogram.contrib.middlewares.logging import LoggingMiddleware
+
 
 if __name__ == '__main__':
     from aiogram.utils import executor
