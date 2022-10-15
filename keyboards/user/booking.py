@@ -62,3 +62,14 @@ async def edit_data_kb(f_name, l_name, date, time, num_of_people) -> InlineKeybo
             ]
         ]
     )
+
+
+async def confirm_edit_kb(edit: str, back: str) -> InlineKeyboardMarkup:
+    return InlineKeyboardMarkup(
+        inline_keyboard=[
+            [
+                InlineKeyboardButton(text='Подтвердить', callback_data=edit),
+                InlineKeyboardButton(text='Назад', callback_data=back)
+            ]
+        ]
+    )

@@ -2,7 +2,7 @@ from aiogram import types
 from aiogram.types import CallbackQuery
 
 from loader import dp, bot
-from keyboards.user.booking import booking_kb, booking_modify_kb, edit_data_kb
+from keyboards.user.booking import booking_kb, booking_modify_kb, edit_data_kb, confirm_edit_kb
 from aiogram_calendar import SimpleCalendar, simple_cal_callback
 from keyboards.user.back import back_kb
 from states.booking import BookingStates
@@ -43,8 +43,11 @@ async def l_name_booking(message: types.Message, state: FSMContext):
     await state.update_data(f_name=message.text)
     await BookingStates.next()
     await BookingStates.l_name.set()
-    await message.delete()
-    await message.answer('Введите Вашу фамилию:')
+    await bot.delete_message(chat_id=message.chat.id,
+                             message_id=message.message_id)
+    await bot.edit_message_text(chat_id=message.chat.id,
+                                message_id=message.message_id - 1,
+                                text='Введите Вашу фамилию:')
 
 
 @dp.message_handler(state=BookingStates.l_name)
@@ -53,8 +56,12 @@ async def date_booking(message: types.Message, state: FSMContext):
     await BookingStates.next()
     await BookingStates.date.set()
     await message.delete()
-    await message.answer('Выберите дату:',
-                         reply_markup=await SimpleCalendar().start_calendar())
+    await bot.edit_message_text(chat_id=message.chat.id,
+                                message_id=message.message_id - 2,
+                                text='Выберите дату:',
+                                reply_markup=await SimpleCalendar().start_calendar())
+    # await message.answer(text='Выберите дату:',
+    #                      reply_markup=await SimpleCalendar().start_calendar())
 
 
 async def is_valid_date(date: str) -> bool:
@@ -75,23 +82,27 @@ async def is_valid_date(date: str) -> bool:
 async def verify_selection(callback_query: CallbackQuery, callback_data: dict, state: FSMContext):
     selected, date = await SimpleCalendar().process_selection(callback_query, callback_data)
     if selected:
-        await callback_query.message.edit_text(f'Бронирование на {date.strftime("%d/%m/%Y")}')
         result_select_date = date.strftime("%d/%m/%Y")
         if not await is_valid_date(result_select_date):
-            await callback_query.message.answer(f'Выбрана некорректная дата. Проверьте правильность ввода.',
+            await callback_query.message.answer(f'Выбрана некорректная дата {date.strftime("%d/%m/%Y")}\n'
+                                                f'Проверьте правильность ввода.',
                                                 reply_markup=await SimpleCalendar().start_calendar())
         else:
             await state.update_data(date=result_select_date)
             await BookingStates.next()
             await BookingStates.time.set()
-            await callback_query.message.edit_text('На какое время хотите забронировать столик?\n'
-                                                   'Время вводится в формате Часы:Минуты')
+            await callback_query.message.edit_text(f'Дата бронирования: {date.strftime("%d/%m/%Y")}.\n'
+                                                   f'На какое время хотите забронировать столик?\n'
+                                                   f'Время вводится в формате Часы:Минуты')
 
 
 async def is_valid_time(message_time) -> bool:
     message_time = message_time['text'].split(':')
-    if 24 > int(message_time[0]) > 00 and 60 >= int(message_time[1]) >= 0:
-        return True
+    if len(message_time[0]) == 2 and len(message_time[1]) == 2:
+        if 24 > int(message_time[0]) >= 00 and 60 >= int(message_time[1]) >= 0:
+            return True
+        else:
+            return False
     else:
         return False
 
@@ -100,23 +111,22 @@ async def is_valid_time(message_time) -> bool:
 async def booking_time(message: types.Message, state=FSMContext):
     if not await is_valid_time(message):
         await message.delete()
-        await message.answer("Время введено не корректно, проверьте правильность ввода.\n"
-                             "Формат ввода Часы:Минуты")
+        await message.answer(text="Время введено не корректно, проверьте правильность ввода.\n"
+                                  "Формат ввода Часы:Минуты")
     else:
-
         await state.update_data(time=message.text)
         await BookingStates.next()
         await BookingStates.num_of_people.set()
         await message.delete()
-        await message.answer('Время введено корректно и записано.\n'
-                             'Введите количество человек')
+        await message.answer(text='Время введено корректно и записано.\n'
+                                  'Введите количество человек (от 1 до 6):')
 
 
 @dp.message_handler(state=BookingStates.num_of_people)
 async def booking_peoples(message: types.Message, state=FSMContext):
     if 0 > int(message.text) > 6:
         await message.delete()
-        await message.answer('Количество человек должно быть не больше 6 за один стол.')
+        await message.answer(text='Количество человек должно быть не больше 6 за один стол.')
     else:
         await state.update_data(num_of_people=message.text)
         booking_data = await state.get_data()
@@ -126,9 +136,9 @@ async def booking_peoples(message: types.Message, state=FSMContext):
         time = booking_data['time']
         number_people = booking_data['num_of_people']
         await message.delete()
-        await message.answer(f'Бронь на имя {f_name} {l_name}.\nДата: {date}, время: {time}.\n'
-                             f'Количество человек: {number_people}.\n'
-                             f'Всё верно?',
+        await message.answer(text=f'Бронь на имя {f_name} {l_name}.\nДата: {date}, время: {time}.\n'
+                                  f'Количество человек: {number_people}.\n'
+                                  f'Всё верно?',
                              reply_markup=await booking_modify_kb())
 
 
@@ -160,3 +170,25 @@ async def confirm_booking(call: types.CallbackQuery, state: FSMContext):
                                  f'Количество человек: {num}.\n'
                                  f'Всё верно?',
                                  reply_markup=await booking_modify_kb())
+
+
+@dp.callback_query_handler(lambda x: x.data == 'edit_fname', state='*')
+async def edit_fname(call: types.CallbackQuery, state: FSMContext):
+    # await ???? какое-то состояние, доделать потом
+    await call.message.edit_text(text='Введите измененное имя и нажмите кнопку подтвердить',
+                                 reply_markup=await confirm_edit_kb(edit='fname',
+                                                                    back='edit_booking_data'))
+
+
+@dp.callback_query_handler(lambda x: x.data == 'fname', state='*')
+async def edit_fname(message: types.Message, state: FSMContext):
+    await state.update_data(f_name=message.text)
+    await message.delete()
+    await bot.edit_message_text(chat_id=message.chat.id,
+                                message_id=message.message_id - 1,
+                                text='Имя успешно изменено.',
+                                reply_markup=await back_kb(target='edit_booking_data'))
+
+
+
+
