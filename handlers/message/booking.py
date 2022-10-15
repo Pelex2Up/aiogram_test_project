@@ -5,7 +5,7 @@ from loader import dp, bot
 from keyboards.user.booking import booking_kb, booking_modify_kb, edit_data_kb, confirm_edit_kb
 from aiogram_calendar import SimpleCalendar, simple_cal_callback
 from keyboards.user.back import back_kb
-from states.booking import BookingStates
+from states.booking import BookingStates, BookingEdit
 from aiogram.dispatcher import FSMContext
 from datetime import datetime
 
@@ -142,7 +142,7 @@ async def booking_peoples(message: types.Message, state=FSMContext):
                              reply_markup=await booking_modify_kb())
 
 
-@dp.callback_query_handler(lambda x: x.data == 'commit_booking_data', state=BookingStates.num_of_people)
+@dp.callback_query_handler(lambda x: x.data == 'commit_booking_data', state='*')
 async def commit_booking(callback_query: types.CallbackQuery, state: FSMContext):
     await state.finish()
     await callback_query.message.edit_text(text='Регистрация прошла успешно',
@@ -158,8 +158,7 @@ async def edit_data(callback_query: types.CallbackQuery, state: FSMContext):
     time = booking_data['time']
     number_people = booking_data['num_of_people']
     await callback_query.message.edit_text(text='Что вы хотите изменить?',
-                                           reply_markup=await edit_data_kb(f_name, l_name, date, time, number_people)
-                                          )
+                                           reply_markup=await edit_data_kb(f_name, l_name, date, time, number_people))
 
 
 @dp.callback_query_handler(lambda x: x.data == 'confirm_booking', state='*')
@@ -174,21 +173,91 @@ async def confirm_booking(call: types.CallbackQuery, state: FSMContext):
 
 @dp.callback_query_handler(lambda x: x.data == 'edit_fname', state='*')
 async def edit_fname(call: types.CallbackQuery, state: FSMContext):
-    # await ???? какое-то состояние, доделать потом
-    await call.message.edit_text(text='Введите измененное имя и нажмите кнопку подтвердить',
-                                 reply_markup=await confirm_edit_kb(edit='fname',
-                                                                    back='edit_booking_data'))
+    await BookingEdit.fname_edit.set()
+    await call.message.edit_text(text='Введите измененное имя:',
+                                 reply_markup=await back_kb(target='edit_booking_data'))
 
 
-@dp.callback_query_handler(lambda x: x.data == 'fname', state='*')
+@dp.message_handler(state=BookingEdit.fname_edit)
 async def edit_fname(message: types.Message, state: FSMContext):
+    await BookingStates.f_name.set()
     await state.update_data(f_name=message.text)
     await message.delete()
+    await BookingStates.next()
+    await BookingEdit.next()
+    await BookingStates.editing.set()
+    await BookingEdit.editing.set()
     await bot.edit_message_text(chat_id=message.chat.id,
                                 message_id=message.message_id - 1,
-                                text='Имя успешно изменено.',
-                                reply_markup=await back_kb(target='edit_booking_data'))
+                                text=f'Имя успешно изменено на: {message.text}',
+                                reply_markup=await back_kb(target='edit_booking_data',
+                                                           text='OK'))
 
 
+@dp.callback_query_handler(lambda x: x.data == 'edit_lname', state='*')
+async def edit_fname(call: types.CallbackQuery, state: FSMContext):
+    await BookingEdit.lname_edit.set()
+    await call.message.edit_text(text='Введите измененную фамилию:',
+                                 reply_markup=await back_kb(target='edit_booking_data'))
 
 
+@dp.message_handler(state=BookingEdit.lname_edit)
+async def edit_fname(message: types.Message, state: FSMContext):
+    await BookingStates.l_name.set()
+    await state.update_data(l_name=message.text)
+    await message.delete()
+    await BookingStates.next()
+    await BookingEdit.next()
+    await BookingStates.editing.set()
+    await BookingEdit.editing.set()
+    await bot.edit_message_text(chat_id=message.chat.id,
+                                message_id=message.message_id - 1,
+                                text=f'Фамилия успешно изменена на: {message.text}',
+                                reply_markup=await back_kb(target='edit_booking_data',
+                                                           text='OK'))
+
+
+@dp.callback_query_handler(lambda x: x.data == 'edit_time', state='*')
+async def edit_fname(call: types.CallbackQuery, state: FSMContext):
+    await BookingEdit.time_edit.set()
+    await call.message.edit_text(text='Введите новое время:',
+                                 reply_markup=await back_kb(target='edit_booking_data'))
+
+
+@dp.message_handler(state=BookingEdit.time_edit)
+async def edit_fname(message: types.Message, state: FSMContext):
+    await BookingStates.time.set()
+    await state.update_data(time=message.text)
+    await message.delete()
+    await BookingStates.next()
+    await BookingEdit.next()
+    await BookingStates.editing.set()
+    await BookingEdit.editing.set()
+    await bot.edit_message_text(chat_id=message.chat.id,
+                                message_id=message.message_id - 2,
+                                text=f'Время успешно изменена на: {message.text}',
+                                reply_markup=await back_kb(target='edit_booking_data',
+                                                           text='OK'))
+
+
+@dp.callback_query_handler(lambda x: x.data == 'edit_ppl', state='*')
+async def edit_fname(call: types.CallbackQuery, state: FSMContext):
+    await BookingEdit.ppl_edit.set()
+    await call.message.edit_text(text='Введите количество человек:',
+                                 reply_markup=await back_kb(target='edit_booking_data'))
+
+
+@dp.message_handler(state=BookingEdit.ppl_edit)
+async def edit_fname(message: types.Message, state: FSMContext):
+    await BookingStates.num_of_people.set()
+    await state.update_data(num_of_people=message.text)
+    await message.delete()
+    await BookingStates.next()
+    await BookingEdit.next()
+    await BookingStates.editing.set()
+    await BookingEdit.editing.set()
+    await bot.edit_message_text(chat_id=message.chat.id,
+                                message_id=message.message_id - 1,
+                                text=f'Количество человек успешно изменено на: {message.text}',
+                                reply_markup=await back_kb(target='edit_booking_data',
+                                                           text='OK'))

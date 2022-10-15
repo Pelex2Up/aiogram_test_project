@@ -7,3 +7,13 @@ class BookingStates(StatesGroup):
     date = State()
     time = State()
     num_of_people = State()
+    editing = State()
+
+
+class BookingEdit(StatesGroup):
+    fname_edit = State()
+    lname_edit = State()
+    date_edit = State()
+    time_edit = State()
+    ppl_edit = State()
+    editing = State()

@@ -1,7 +1,7 @@
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 
 
-async def back_kb(target: str) -> InlineKeyboardMarkup:
+async def back_kb(target: str, text='Назад') -> InlineKeyboardMarkup:
     """"
     Клавиатура назад
     :return InlineKeyboardMarkup
@@ -9,7 +9,7 @@ async def back_kb(target: str) -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(
         inline_keyboard=[
             [
-                InlineKeyboardButton(text="Назад", callback_data=target)
+                InlineKeyboardButton(text=text, callback_data=target)
             ]
         ]
     )

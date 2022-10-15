@@ -52,7 +52,7 @@ async def edit_data_kb(f_name, l_name, date, time, num_of_people) -> InlineKeybo
                 InlineKeyboardButton(text=f'Дата -> {date}', callback_data='edit_date')
             ],
             [
-                InlineKeyboardButton(text=f'Время -> {time}', callback_data='time')
+                InlineKeyboardButton(text=f'Время -> {time}', callback_data='edit_time')
             ],
             [
                 InlineKeyboardButton(text=f'Количество человек -> {num_of_people}', callback_data='edit_ppl')
