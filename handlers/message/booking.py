@@ -1,5 +1,6 @@
 from aiogram import types
 from aiogram.types import CallbackQuery
+from aiogram.utils.exceptions import BadRequest
 
 from loader import dp, bot
 from keyboards.user.booking import booking_kb, booking_modify_kb, edit_data_kb, confirm_edit_kb
@@ -43,11 +44,16 @@ async def l_name_booking(message: types.Message, state: FSMContext):
     await state.update_data(f_name=message.text)
     await BookingStates.next()
     await BookingStates.l_name.set()
-    await bot.delete_message(chat_id=message.chat.id,
-                             message_id=message.message_id)
-    await bot.edit_message_text(chat_id=message.chat.id,
-                                message_id=message.message_id - 1,
-                                text='Введите Вашу фамилию:')
+    await message.answer(text='Введите Вашу фамилию:')
+
+    for i in range(message.message_id, 0, -1):
+        try:
+            await bot.delete_message(
+                chat_id=message.from_user.id,
+                message_id=i
+            )
+        except BadRequest:
+            pass
 
 
 @dp.message_handler(state=BookingStates.l_name)
@@ -55,13 +61,19 @@ async def date_booking(message: types.Message, state: FSMContext):
     await state.update_data(l_name=message.text)
     await BookingStates.next()
     await BookingStates.date.set()
-    await message.delete()
-    await bot.edit_message_text(chat_id=message.chat.id,
-                                message_id=message.message_id - 2,
-                                text='Выберите дату:',
-                                reply_markup=await SimpleCalendar().start_calendar())
-    # await message.answer(text='Выберите дату:',
-    #                      reply_markup=await SimpleCalendar().start_calendar())
+
+    await message.answer(text='Выберите дату:', reply_markup=await SimpleCalendar().start_calendar())
+
+    for i in range(message.message_id, 0, -1):
+        try:
+            await bot.delete_message(
+                chat_id=message.from_user.id,
+                message_id=i
+            )
+        except BadRequest:
+            pass
+
+
 
 
 async def is_valid_date(date: str) -> bool:
@@ -84,9 +96,9 @@ async def verify_selection(callback_query: CallbackQuery, callback_data: dict, s
     if selected:
         result_select_date = date.strftime("%d/%m/%Y")
         if not await is_valid_date(result_select_date):
-            await callback_query.message.answer(f'Выбрана некорректная дата {date.strftime("%d/%m/%Y")}\n'
-                                                f'Проверьте правильность ввода.',
-                                                reply_markup=await SimpleCalendar().start_calendar())
+            await callback_query.message.edit_text(f'Выбрана некорректная дата {date.strftime("%d/%m/%Y")}\n'
+                                                   f'Проверьте правильность ввода.',
+                                                   reply_markup=await SimpleCalendar().start_calendar())
         else:
             await state.update_data(date=result_select_date)
             await BookingStates.next()
@@ -117,9 +129,17 @@ async def booking_time(message: types.Message, state=FSMContext):
         await state.update_data(time=message.text)
         await BookingStates.next()
         await BookingStates.num_of_people.set()
-        await message.delete()
         await message.answer(text='Время введено корректно и записано.\n'
                                   'Введите количество человек (от 1 до 6):')
+
+    for i in range(message.message_id, 0, -1):
+        try:
+            await bot.delete_message(
+                chat_id=message.from_user.id,
+                message_id=i
+            )
+        except BadRequest:
+            pass
 
 
 @dp.message_handler(state=BookingStates.num_of_people)
@@ -140,6 +160,15 @@ async def booking_peoples(message: types.Message, state=FSMContext):
                                   f'Количество человек: {number_people}.\n'
                                   f'Всё верно?',
                              reply_markup=await booking_modify_kb())
+
+    for i in range(message.message_id, 0, -1):
+        try:
+            await bot.delete_message(
+                chat_id=message.from_user.id,
+                message_id=i
+            )
+        except BadRequest:
+            pass
 
 
 @dp.callback_query_handler(lambda x: x.data == 'commit_booking_data', state='*')
@@ -166,8 +195,8 @@ async def confirm_booking(call: types.CallbackQuery, state: FSMContext):
     booking_data = await state.get_data()
     f_name, l_name, date, time, num = booking_data.values()
     await call.message.edit_text(text=f'Бронь на имя {f_name} {l_name}.\nДата: {date}, время: {time}.\n'
-                                 f'Количество человек: {num}.\n'
-                                 f'Всё верно?',
+                                      f'Количество человек: {num}.\n'
+                                      f'Всё верно?',
                                  reply_markup=await booking_modify_kb())
 
 
