@@ -32,10 +32,8 @@ async def cancel_fsm(callback_query: types.CallbackQuery, state: FSMContext):
 
 @dp.callback_query_handler(lambda x: x.data == 'create_booking')
 async def start_booking(callback_query: types.CallbackQuery):
-    await callback_query.message.delete()
-    await bot.send_message(callback_query.from_user.id,
-                           text='Введите Ваше имя:',
-                           reply_markup=await back_kb(target='cancel'))
+    await callback_query.message.edit_text(text='Введите Ваше имя:',
+                                           reply_markup=await back_kb(target='cancel'))
     await BookingStates.f_name.set()
 
 
@@ -202,7 +200,7 @@ async def confirm_booking(call: types.CallbackQuery, state: FSMContext):
 
 
 @dp.callback_query_handler(lambda x: x.data == 'edit_fname', state='*')
-async def edit_fname(call: types.CallbackQuery, state: FSMContext):
+async def edit_fname_handler(call: types.CallbackQuery, state: FSMContext):
     await BookingEdit.fname_edit.set()
     await call.message.edit_text(text='Введите измененное имя:',
                                  reply_markup=await back_kb(target='edit_booking_data'))
@@ -229,14 +227,14 @@ async def edit_fname(message: types.Message, state: FSMContext):
 
 
 @dp.callback_query_handler(lambda x: x.data == 'edit_lname', state='*')
-async def edit_fname(call: types.CallbackQuery, state: FSMContext):
+async def edit_lname_handler(call: types.CallbackQuery, state: FSMContext):
     await BookingEdit.lname_edit.set()
     await call.message.edit_text(text='Введите измененную фамилию:',
                                  reply_markup=await back_kb(target='edit_booking_data'))
 
 
 @dp.message_handler(state=BookingEdit.lname_edit)
-async def edit_fname(message: types.Message, state: FSMContext):
+async def edit_lname(message: types.Message, state: FSMContext):
     await BookingStates.l_name.set()
     await state.update_data(l_name=message.text)
     await message.delete()
@@ -256,14 +254,14 @@ async def edit_fname(message: types.Message, state: FSMContext):
 
 
 @dp.callback_query_handler(lambda x: x.data == 'edit_time', state='*')
-async def edit_fname(call: types.CallbackQuery, state: FSMContext):
+async def edit_time_handler(call: types.CallbackQuery, state: FSMContext):
     await BookingEdit.time_edit.set()
     await call.message.edit_text(text='Введите новое время:',
                                  reply_markup=await back_kb(target='edit_booking_data'))
 
 
 @dp.message_handler(state=BookingEdit.time_edit)
-async def edit_fname(message: types.Message, state: FSMContext):
+async def edit_time(message: types.Message, state: FSMContext):
     await BookingStates.time.set()
     await state.update_data(time=message.text)
     await message.delete()
@@ -283,7 +281,7 @@ async def edit_fname(message: types.Message, state: FSMContext):
 
 
 @dp.callback_query_handler(lambda x: x.data == 'edit_ppl', state='*')
-async def edit_fname(call: types.CallbackQuery, state: FSMContext):
+async def edit_fname_handler(call: types.CallbackQuery, state: FSMContext):
     await BookingEdit.ppl_edit.set()
     await call.message.edit_text(text='Введите количество человек:',
                                  reply_markup=await back_kb(target='edit_booking_data'))
@@ -307,3 +305,31 @@ async def edit_fname(message: types.Message, state: FSMContext):
                                                                    text='OK'))
         except BadRequest:
             pass
+
+
+@dp.callback_query_handler(lambda x: x.data == 'edit_date', state='*')
+async def edit_date_handler(call: types.CallbackQuery, state: FSMContext):
+    await BookingEdit.date_edit.set()
+    await call.message.edit_text(text='Выберите дату: ',
+                                 reply_markup=await SimpleCalendar().start_calendar())
+
+
+@dp.callback_query_handler(simple_cal_callback.filter(), state=BookingEdit.date_edit)
+async def edit_date(call: types.CallbackQuery, callback_data: dict, state: FSMContext):
+    await BookingStates.date.set()
+    selected, date = await SimpleCalendar().process_selection(query=call, data=callback_data)
+    if selected:
+        result_select_date = date.strftime("%d/%m/%Y")
+        if not await is_valid_date(result_select_date):
+            await call.message.edit_text(f'Выбрана некорректная дата {date.strftime("%d/%m/%Y")}\n'
+                                         f'Проверьте правильность ввода.',
+                                         reply_markup=await SimpleCalendar().start_calendar())
+        else:
+            await state.update_data(date=result_select_date)
+            await BookingStates.next()
+            await BookingEdit.next()
+            await BookingStates.editing.set()
+            await BookingEdit.editing.set()
+            await call.message.edit_text(text=f'Дата успешно изменена на: {date.strftime("%d/%m/%Y")}',
+                                         reply_markup=await back_kb(target='edit_booking_data',
+                                                                    text='OK'))
