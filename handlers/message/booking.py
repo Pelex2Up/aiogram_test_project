@@ -44,13 +44,14 @@ async def l_name_booking(message: types.Message, state: FSMContext):
     await state.update_data(f_name=message.text)
     await BookingStates.next()
     await BookingStates.l_name.set()
-    await message.answer(text='Введите Вашу фамилию:')
+    await message.delete()
 
     for i in range(message.message_id, 0, -1):
         try:
-            await bot.delete_message(
+            await bot.edit_message_text(
                 chat_id=message.from_user.id,
-                message_id=i
+                message_id=i,
+                text='Введите Вашу фамилию:'
             )
         except BadRequest:
             pass
@@ -61,19 +62,18 @@ async def date_booking(message: types.Message, state: FSMContext):
     await state.update_data(l_name=message.text)
     await BookingStates.next()
     await BookingStates.date.set()
-
-    await message.answer(text='Выберите дату:', reply_markup=await SimpleCalendar().start_calendar())
+    await message.delete()
 
     for i in range(message.message_id, 0, -1):
         try:
-            await bot.delete_message(
+            await bot.edit_message_text(
                 chat_id=message.from_user.id,
-                message_id=i
+                message_id=i,
+                text='Выберите дату: ',
+                reply_markup=await SimpleCalendar().start_calendar()
             )
         except BadRequest:
             pass
-
-
 
 
 async def is_valid_date(date: str) -> bool:
@@ -129,14 +129,15 @@ async def booking_time(message: types.Message, state=FSMContext):
         await state.update_data(time=message.text)
         await BookingStates.next()
         await BookingStates.num_of_people.set()
-        await message.answer(text='Время введено корректно и записано.\n'
-                                  'Введите количество человек (от 1 до 6):')
+        await message.delete()
 
     for i in range(message.message_id, 0, -1):
         try:
-            await bot.delete_message(
+            await bot.edit_message_text(
                 chat_id=message.from_user.id,
-                message_id=i
+                message_id=i,
+                text='Время введено корректно и записано.\n'
+                     'Введите количество человек (от 1 до 6):'
             )
         except BadRequest:
             pass
@@ -156,19 +157,19 @@ async def booking_peoples(message: types.Message, state=FSMContext):
         time = booking_data['time']
         number_people = booking_data['num_of_people']
         await message.delete()
-        await message.answer(text=f'Бронь на имя {f_name} {l_name}.\nДата: {date}, время: {time}.\n'
-                                  f'Количество человек: {number_people}.\n'
-                                  f'Всё верно?',
-                             reply_markup=await booking_modify_kb())
 
-    for i in range(message.message_id, 0, -1):
-        try:
-            await bot.delete_message(
-                chat_id=message.from_user.id,
-                message_id=i
-            )
-        except BadRequest:
-            pass
+        for i in range(message.message_id, 0, -1):
+            try:
+                await bot.edit_message_text(
+                    chat_id=message.from_user.id,
+                    message_id=i,
+                    text=f'Бронь на имя {f_name} {l_name}.\nДата: {date}, время: {time}.\n'
+                         f'Количество человек: {number_people}.\n'
+                         f'Всё верно?',
+                    reply_markup=await booking_modify_kb()
+                )
+            except BadRequest:
+                pass
 
 
 @dp.callback_query_handler(lambda x: x.data == 'commit_booking_data', state='*')
@@ -216,11 +217,15 @@ async def edit_fname(message: types.Message, state: FSMContext):
     await BookingEdit.next()
     await BookingStates.editing.set()
     await BookingEdit.editing.set()
-    await bot.edit_message_text(chat_id=message.chat.id,
-                                message_id=message.message_id - 1,
-                                text=f'Имя успешно изменено на: {message.text}',
-                                reply_markup=await back_kb(target='edit_booking_data',
-                                                           text='OK'))
+    for i in range(message.message_id, 0, -1):
+        try:
+            await bot.edit_message_text(chat_id=message.from_user.id,
+                                        message_id=i,
+                                        text=f'Имя успешно изменено на: {message.text}',
+                                        reply_markup=await back_kb(target='edit_booking_data',
+                                                                   text='OK'))
+        except BadRequest:
+            pass
 
 
 @dp.callback_query_handler(lambda x: x.data == 'edit_lname', state='*')
@@ -239,11 +244,15 @@ async def edit_fname(message: types.Message, state: FSMContext):
     await BookingEdit.next()
     await BookingStates.editing.set()
     await BookingEdit.editing.set()
-    await bot.edit_message_text(chat_id=message.chat.id,
-                                message_id=message.message_id - 1,
-                                text=f'Фамилия успешно изменена на: {message.text}',
-                                reply_markup=await back_kb(target='edit_booking_data',
-                                                           text='OK'))
+    for i in range(message.message_id, 0, -1):
+        try:
+            await bot.edit_message_text(chat_id=message.from_user.id,
+                                        message_id=i,
+                                        text=f'Фамилия успешно изменена на: {message.text}',
+                                        reply_markup=await back_kb(target='edit_booking_data',
+                                                                   text='OK'))
+        except BadRequest:
+            pass
 
 
 @dp.callback_query_handler(lambda x: x.data == 'edit_time', state='*')
@@ -262,11 +271,15 @@ async def edit_fname(message: types.Message, state: FSMContext):
     await BookingEdit.next()
     await BookingStates.editing.set()
     await BookingEdit.editing.set()
-    await bot.edit_message_text(chat_id=message.chat.id,
-                                message_id=message.message_id - 2,
-                                text=f'Время успешно изменена на: {message.text}',
-                                reply_markup=await back_kb(target='edit_booking_data',
-                                                           text='OK'))
+    for i in range(message.message_id, 0, -1):
+        try:
+            await bot.edit_message_text(chat_id=message.from_user.id,
+                                        message_id=i,
+                                        text=f'Время успешно изменена на: {message.text}',
+                                        reply_markup=await back_kb(target='edit_booking_data',
+                                                                   text='OK'))
+        except BadRequest:
+            pass
 
 
 @dp.callback_query_handler(lambda x: x.data == 'edit_ppl', state='*')
@@ -285,8 +298,12 @@ async def edit_fname(message: types.Message, state: FSMContext):
     await BookingEdit.next()
     await BookingStates.editing.set()
     await BookingEdit.editing.set()
-    await bot.edit_message_text(chat_id=message.chat.id,
-                                message_id=message.message_id - 1,
-                                text=f'Количество человек успешно изменено на: {message.text}',
-                                reply_markup=await back_kb(target='edit_booking_data',
-                                                           text='OK'))
+    for i in range(message.message_id, 0, -1):
+        try:
+            await bot.edit_message_text(chat_id=message.from_user.id,
+                                        message_id=i,
+                                        text=f'Количество человек успешно изменено на: {message.text}',
+                                        reply_markup=await back_kb(target='edit_booking_data',
+                                                                   text='OK'))
+        except BadRequest:
+            pass
