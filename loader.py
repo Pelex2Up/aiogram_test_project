@@ -1,10 +1,15 @@
-from data.config import BOT_TOKEN, DATA_BASE
-from aiogram import Bot, Dispatcher, types
+from aiogram import Bot, Dispatcher
+from aiogram.types import ParseMode
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 
-import asyncpg
+from config import CONFIG
 
-bot = Bot(token=BOT_TOKEN, parse_mode=types.ParseMode.HTML)
-dp = Dispatcher(bot, storage=MemoryStorage())
-
-db = await asyncpg.connect(DATA_BASE)
+bot = Bot(
+    token=CONFIG.BOT.TOKEN,
+    parse_mode=ParseMode.HTML
+)
+storage = MemoryStorage()
+dp = Dispatcher(
+    bot=bot,
+    storage=storage
+)

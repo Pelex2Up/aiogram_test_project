@@ -1,3 +1,3 @@
-from .config import BOT_TOKEN
-
-__all__ = 'dp'
+# from .config import BOT_TOKEN
+#
+# __all__ = 'dp'

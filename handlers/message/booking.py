@@ -9,7 +9,7 @@ from keyboards.user.back import back_kb
 from states.booking import BookingStates, BookingEdit
 from aiogram.dispatcher import FSMContext
 from datetime import datetime
-from data.data_base.db_tips import booking_update_db
+# from data.data_base.db_tips import booking_update_db
 
 
 @dp.callback_query_handler(lambda x: x.data == 'booking')
@@ -182,7 +182,7 @@ async def commit_booking(callback_query: types.CallbackQuery, state: FSMContext)
     f_name = booking_data['f_name']
     date = booking_data['date']
     time = booking_data['time']
-    await booking_update_db(f_name, date, time)
+    # await booking_update_db(f_name, date, time)
     await state.finish()
     await callback_query.message.edit_text(text='Регистрация прошла успешно.\n'
                                                 f'{f_name}, ваш столик забронирован на {date}, {time}.',

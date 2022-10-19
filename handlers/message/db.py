@@ -1,5 +1,7 @@
 from aiogram import types
-from loader import dp, db
+from sqlalchemy.testing import db
+
+from loader import dp
 
 
 @dp.message_handler(commands=['create_db'])

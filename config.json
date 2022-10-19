@@ -1,0 +1,7 @@
+{
+  "BOT": {
+    "TOKEN": "5157144703:AAG-V6yRvOsNjkVKh05p_TtrSD8i2grFrGs",
+    "ADMINS": [381252111]
+  },
+  "DATABASE": "postgres:postgres@localhost:5432/barBot"
+}

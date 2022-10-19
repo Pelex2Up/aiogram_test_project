@@ -14,4 +14,4 @@ if __name__ == '__main__':
 
     print(f'{datetime.datetime.now()} -- Test_cafe_bot: Начинаю работу.')
     dp.middleware.setup(LoggingMiddleware())
-    executor.start_polling(dp , on_startup=on_startup)
+    executor.start_polling(dp, on_startup=on_startup)
