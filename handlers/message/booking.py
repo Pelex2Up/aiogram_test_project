@@ -121,7 +121,7 @@ async def is_valid_time(message_time) -> bool:
 
 
 @dp.message_handler(state=BookingStates.time)
-async def booking_time(message: types.Message, state=FSMContext):
+async def booking_time(message: types.Message, state: FSMContext):
     if not await is_valid_time(message):
         await message.delete()
         for i in range(message.message_id, 0, -1):
