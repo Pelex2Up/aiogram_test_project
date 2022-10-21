@@ -1,13 +1,13 @@
-from datetime import datetime
+from datetime import datetime, date
 from pydantic import BaseModel, Field
 
 
 class UserSchema(BaseModel):
     f_name: str
     l_name: str
-    date: datetime = Field(default=datetime.now())
+    date: str #datetime = Field(default=datetime.now())
     time: str
-    num_of_people: str
+    num_of_people: int
 
 
 class UserInDBSchema(UserSchema):

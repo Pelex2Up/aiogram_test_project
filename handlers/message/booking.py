@@ -2,14 +2,15 @@ from aiogram import types
 from aiogram.types import CallbackQuery
 from aiogram.utils.exceptions import BadRequest
 
+from crud.users_crud import CRUDUser
 from loader import dp, bot
 from keyboards.user.booking import booking_kb, booking_modify_kb, edit_data_kb, confirm_edit_kb
 from aiogram_calendar import SimpleCalendar, simple_cal_callback
 from keyboards.user.back import back_kb
+from schemas import UserSchema
 from states.booking import BookingStates, BookingEdit
 from aiogram.dispatcher import FSMContext
 from datetime import datetime
-# from data.data_base.db_tips import booking_update_db
 
 
 @dp.callback_query_handler(lambda x: x.data == 'booking')
@@ -94,6 +95,7 @@ async def verify_selection(callback_query: CallbackQuery, callback_data: dict, s
     selected, date = await SimpleCalendar().process_selection(callback_query, callback_data)
     if selected:
         result_select_date = date.strftime("%d/%m/%Y")
+        print(result_select_date)
         if not await is_valid_date(result_select_date):
             await callback_query.message.edit_text(f'Выбрана некорректная дата {date.strftime("%d/%m/%Y")}\n'
                                                    f'Проверьте правильность ввода.',
@@ -153,7 +155,7 @@ async def booking_peoples(message: types.Message, state=FSMContext):
         await message.delete()
         await message.answer(text='Количество человек должно быть не больше 6 за один стол.')
     else:
-        await state.update_data(num_of_people=message.text)
+        await state.update_data(num_of_people=int(message.text))
         booking_data = await state.get_data()
         f_name = booking_data['f_name']
         l_name = booking_data['l_name']
@@ -179,14 +181,18 @@ async def booking_peoples(message: types.Message, state=FSMContext):
 @dp.callback_query_handler(lambda x: x.data == 'commit_booking_data', state='*')
 async def commit_booking(callback_query: types.CallbackQuery, state: FSMContext):
     booking_data = await state.get_data()
-    f_name = booking_data['f_name']
-    date = booking_data['date']
-    time = booking_data['time']
-    # await booking_update_db(f_name, date, time)
-    await state.finish()
-    await callback_query.message.edit_text(text='Регистрация прошла успешно.\n'
-                                                f'{f_name}, ваш столик забронирован на {date}, {time}.',
-                                           reply_markup=await back_kb(target='main_menu'))
+    confirm_registration = await CRUDUser.add(user=UserSchema(**booking_data))
+    if confirm_registration:
+        await state.finish()
+        await callback_query.message.edit_text(text='Регистрация прошла успешно.\n'
+                                                    f'{booking_data["f_name"]}, ваш столик забронирован на '
+                                                    f'{booking_data["date"]}, {booking_data["time"]}.',
+                                               reply_markup=await back_kb(target='main_menu'))
+    else:
+        await state.finish()
+        await callback_query.message.edit_text(text='Регистрация завершена с ошибкой.\n'
+                                                    'Попробуйте снова.',
+                                               reply_markup=await back_kb(target='main_menu'))
 
 
 @dp.callback_query_handler(lambda x: x.data == 'edit_booking_data', state='*')
@@ -314,7 +320,7 @@ async def edit_ppl_handler(call: types.CallbackQuery, state: FSMContext):
 async def edit_ppl(message: types.Message, state: FSMContext):
     if message.text.isdigit() and 0 < int(message.text) < 6:
         await BookingStates.num_of_people.set()
-        await state.update_data(num_of_people=message.text)
+        await state.update_data(num_of_people=int(message.text))
         await message.delete()
         await BookingStates.next()
         await BookingEdit.next()

@@ -1,7 +1,7 @@
 {
   "BOT": {
-    "TOKEN": "5157144703:AAG-V6yRvOsNjkVKh05p_TtrSD8i2grFrGs",
-    "ADMINS": [381252111]
+    "TOKEN": "5523585928:AAGGFjbp9azkXMNhfSPIgCzd54EexM7I0ww",
+    "ADMINS": []
   },
-  "DATABASE": "postgres:postgres@localhost:5432/barBot"
+  "DATABASE": "aleksejpetrovec@localhost/data_base_postgres"
 }

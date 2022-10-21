@@ -12,6 +12,16 @@ class UsersBooking(Base):
     id = Column(Integer, primary_key=True)
     f_name = Column(Text, nullable=True)
     l_name = Column(Text, nullable=True)
-    date = Column(TIMESTAMP, nullable=False)
+    date = Column(Text, nullable=False)
     time = Column(Text, nullable=True)
-    num_of_people = Column(Text, nullable=True)
+    num_of_people = Column(Integer, nullable=True)
+
+
+class MenuChoice(Base):
+    __tablename__: str = 'food_menu'
+
+    id = Column(Integer, primary_key=True)
+    food_photo = Column(Text, nullable=False)
+    food_name = Column(Text, nullable=False)
+    food_price = Column(Text, nullable=False)
+    food_compound = Column(Text, nullable=False)

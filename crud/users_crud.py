@@ -1,8 +1,8 @@
 from sqlalchemy import select, delete
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
-from schemas import UserSchema, UserInDBSchema
-from models import UsersBooking, create_async_session
+from schemas import UserSchema, UserInDBSchema, MenuSchema, MenuInDBSchema
+from models import UsersBooking, create_async_session, MenuChoice
 
 
 class CRUDUser(object):
@@ -46,3 +46,6 @@ class CRUDUser(object):
             select(UsersBooking)
         )
         return [UserInDBSchema(**user[0].__dict__) for user in users]
+
+
+
