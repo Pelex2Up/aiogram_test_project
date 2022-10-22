@@ -20,7 +20,7 @@ class UsersBooking(Base):
 class MenuChoice(Base):
     __tablename__: str = 'food_menu'
 
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
     food_photo = Column(Text, nullable=False)
     food_name = Column(Text, nullable=False)
     food_price = Column(Text, nullable=False)

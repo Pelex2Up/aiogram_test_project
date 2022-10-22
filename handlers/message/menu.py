@@ -53,7 +53,7 @@ async def food_menu(callback_query: types.CallbackQuery, state: FSMContext):
 @dp.callback_query_handler(lambda x: x.data == 'roll_forward', state=MenuStates)
 async def next_food_menu(callback_query: types.CallbackQuery, state: FSMContext):
     data = await state.get_data()
-    if data['id'] < 4:
+    if data['id'] < 7:
         await state.update_data(id=data['id']+1)
         food_id = await state.get_data()
         get_food = await CRUDMenu.get(food_id=food_id['id'])
@@ -95,7 +95,7 @@ async def back_food_menu(callback_query: types.CallbackQuery, state: FSMContext)
                                                    reply_markup=await menu_kb(),
                                                    parse_mode=ParseMode.HTML)
     else:
-        await state.update_data(id=4)
+        await state.update_data(id=7)
         food_id = await state.get_data()
         get_food = await CRUDMenu.get(food_id=food_id['id'])
         food_photo = get_food.food_photo

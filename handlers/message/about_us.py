@@ -29,3 +29,8 @@ async def about_us_adress(callback_query: types.CallbackQuery):
 async def about_us_work_time(callback_query: types.CallbackQuery):
     await callback_query.message.edit_text(text=f"Режим работы кафе пока в разработке. База данных не заполнена.",
                                            reply_markup=await back_kb(target='about_us'))
+
+
+@dp.callback_query_handler(lambda x: x.data == 'test_button')
+async def test_data_func(callback_query: types.CallbackQuery):
+    await callback_query.message.edit_text(f'{callback_query.data}')

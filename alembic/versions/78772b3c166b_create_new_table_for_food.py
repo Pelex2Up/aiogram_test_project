@@ -18,7 +18,7 @@ depends_on = None
 
 def upgrade() -> None:
     op.create_table('food_menu',
-                    sa.Column('id', sa.Integer, primary_key=True),
+                    sa.Column('id', sa.Integer, primary_key=True, autoincrement=True),
                     sa.Column('food_photo', sa.VARCHAR, nullable=False),
                     sa.Column('food_name', sa.VARCHAR, nullable=False),
                     sa.Column('food_price', sa.VARCHAR, nullable=False),

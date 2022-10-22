@@ -73,3 +73,40 @@ async def confirm_edit_kb(edit: str, back: str) -> InlineKeyboardMarkup:
             ]
         ]
     )
+
+
+async def choice_ppl_kb() -> InlineKeyboardMarkup:
+    return InlineKeyboardMarkup(
+        inline_keyboard=[
+            [
+                InlineKeyboardButton(text='1', callback_data='1'),
+                InlineKeyboardButton(text='2', callback_data='2'),
+                InlineKeyboardButton(text='3', callback_data='3')
+            ],
+            [
+                InlineKeyboardButton(text='4', callback_data='4'),
+                InlineKeyboardButton(text='5', callback_data='5'),
+                InlineKeyboardButton(text='6', callback_data='6')
+            ]
+        ]
+    )
+
+
+async def edit_choice_ppl_kb(target: str) -> InlineKeyboardMarkup:
+    return InlineKeyboardMarkup(
+        inline_keyboard=[
+            [
+                InlineKeyboardButton(text='1', callback_data='1'),
+                InlineKeyboardButton(text='2', callback_data='2'),
+                InlineKeyboardButton(text='3', callback_data='3')
+            ],
+            [
+                InlineKeyboardButton(text='4', callback_data='4'),
+                InlineKeyboardButton(text='5', callback_data='5'),
+                InlineKeyboardButton(text='6', callback_data='6')
+            ],
+            [
+                InlineKeyboardButton(text='Назад', callback_data=target)
+            ]
+        ]
+    )

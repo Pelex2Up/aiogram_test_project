@@ -4,7 +4,8 @@ from aiogram.utils.exceptions import BadRequest
 
 from crud.users_crud import CRUDUser
 from loader import dp, bot
-from keyboards.user.booking import booking_kb, booking_modify_kb, edit_data_kb, confirm_edit_kb
+from keyboards.user.booking import booking_kb, booking_modify_kb, edit_data_kb, confirm_edit_kb, choice_ppl_kb, \
+    edit_choice_ppl_kb
 from aiogram_calendar import SimpleCalendar, simple_cal_callback
 from keyboards.user.back import back_kb
 from schemas import UserSchema
@@ -143,39 +144,29 @@ async def booking_time(message: types.Message, state: FSMContext):
                     chat_id=message.from_user.id,
                     message_id=i,
                     text='Время введено корректно и записано.\n'
-                         'Введите количество человек (от 1 до 6):'
+                         'Выберите количество человек (от 1 до 6):',
+                    reply_markup=await choice_ppl_kb()
                 )
             except BadRequest:
                 pass
 
 
-@dp.message_handler(state=BookingStates.num_of_people)
-async def booking_peoples(message: types.Message, state=FSMContext):
-    if 0 > int(message.text) > 6:
-        await message.delete()
-        await message.answer(text='Количество человек должно быть не больше 6 за один стол.')
-    else:
-        await state.update_data(num_of_people=int(message.text))
-        booking_data = await state.get_data()
-        f_name = booking_data['f_name']
-        l_name = booking_data['l_name']
-        date = booking_data['date']
-        time = booking_data['time']
-        number_people = booking_data['num_of_people']
-        await message.delete()
-
-        for i in range(message.message_id, 0, -1):
-            try:
-                await bot.edit_message_text(
-                    chat_id=message.from_user.id,
-                    message_id=i,
-                    text=f'Бронь на имя {f_name} {l_name}.\nДата: {date}, время: {time}.\n'
-                         f'Количество человек: {number_people}.\n'
-                         f'Всё верно?',
-                    reply_markup=await booking_modify_kb()
-                )
-            except BadRequest:
-                pass
+@dp.callback_query_handler(state=BookingStates.num_of_people)
+async def booking_peoples(callback_query: types.CallbackQuery, state=FSMContext):
+    no_ppl = int(callback_query.data)
+    await state.update_data(num_of_people=no_ppl)
+    booking_data = await state.get_data()
+    f_name = booking_data['f_name']
+    l_name = booking_data['l_name']
+    date = booking_data['date']
+    time = booking_data['time']
+    number_people = booking_data['num_of_people']
+    await BookingStates.editing.set()
+    await callback_query.message.edit_text(
+                text=f'Бронь на имя {f_name} {l_name}.\nДата: {date}, время: {time}.\n'
+                     f'Количество человек: {number_people}.\n'
+                     f'Всё верно?',
+                reply_markup=await booking_modify_kb())
 
 
 @dp.callback_query_handler(lambda x: x.data == 'commit_booking_data', state='*')
@@ -312,38 +303,21 @@ async def edit_time(message: types.Message, state: FSMContext):
 @dp.callback_query_handler(lambda x: x.data == 'edit_ppl', state='*')
 async def edit_ppl_handler(call: types.CallbackQuery, state: FSMContext):
     await BookingEdit.ppl_edit.set()
-    await call.message.edit_text(text='Введите количество человек:',
-                                 reply_markup=await back_kb(target='edit_booking_data'))
+    await call.message.edit_text(text='Выберите количество человек:',
+                                 reply_markup=await edit_choice_ppl_kb(target='edit_booking_data'))
 
 
-@dp.message_handler(state=BookingEdit.ppl_edit)
-async def edit_ppl(message: types.Message, state: FSMContext):
-    if message.text.isdigit() and 0 < int(message.text) < 6:
-        await BookingStates.num_of_people.set()
-        await state.update_data(num_of_people=int(message.text))
-        await message.delete()
-        await BookingStates.next()
-        await BookingEdit.next()
-        await BookingStates.editing.set()
-        await BookingEdit.editing.set()
-        for i in range(message.message_id, 0, -1):
-            try:
-                await bot.edit_message_text(chat_id=message.from_user.id,
-                                            message_id=i,
-                                            text=f'Количество человек успешно изменено на: {message.text}',
-                                            reply_markup=await back_kb(target='edit_booking_data',
-                                                                       text='OK'))
-            except BadRequest:
-                pass
-    else:
-        await message.delete()
-        for i in range(message.message_id, 0, -1):
-            try:
-                await bot.edit_message_text(chat_id=message.from_user.id,
-                                            message_id=i,
-                                            text='Введите корректное количество человек (от 1 до 6): ')
-            except BadRequest:
-                pass
+@dp.callback_query_handler(state=BookingEdit.ppl_edit)
+async def edit_ppl(callback_query: types.CallbackQuery, state: FSMContext):
+    await BookingStates.num_of_people.set()
+    await state.update_data(num_of_people=callback_query.data)
+    await BookingStates.next()
+    await BookingEdit.next()
+    await BookingStates.editing.set()
+    await BookingEdit.editing.set()
+    await callback_query.message.edit_text(text=f'Количество человек успешно изменено на: {callback_query.data}',
+                                           reply_markup=await back_kb(target='edit_booking_data',
+                                                                      text='OK'))
 
 
 @dp.callback_query_handler(lambda x: x.data == 'edit_date', state='*')
