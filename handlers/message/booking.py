@@ -170,8 +170,8 @@ async def edit_data(callback_query: types.CallbackQuery, state: FSMContext):
 @dp.callback_query_handler(lambda x: x.data == 'confirm_booking', state='*')
 async def confirm_booking(call: types.CallbackQuery, state: FSMContext):
     booking_data = await state.get_data()
-    f_name, l_name, date, time, num = booking_data.values()
-    await call.message.edit_text(text=f'Бронь на имя {f_name} {l_name}.\nДата: {date}, время: {time}.\n'
+    f_name, date, time, num = booking_data.values()
+    await call.message.edit_text(text=f'Бронь на имя {f_name}.\nДата: {date}, время: {time}.\n'
                                       f'Количество человек: {num}.\n'
                                       f'Всё верно?',
                                  reply_markup=await booking_modify_kb())
