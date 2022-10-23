@@ -20,7 +20,6 @@ def upgrade() -> None:
     op.create_table('users',
                     sa.Column('id', sa.Integer, primary_key=True),
                     sa.Column('f_name', sa.VARCHAR(length=24), nullable=False),
-                    sa.Column('l_name', sa.VARCHAR(length=24), nullable=False),
                     sa.Column('date', sa.VARCHAR(length=11), nullable=False),
                     sa.Column('time', sa.VARCHAR(length=5), nullable=False),
                     sa.Column('num_of_ppl', sa.Integer, nullable=True),
