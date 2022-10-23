@@ -35,7 +35,7 @@ async def booking_modify_kb() -> InlineKeyboardMarkup:
     )
 
 
-async def edit_data_kb(f_name, l_name, date, time, num_of_people) -> InlineKeyboardMarkup:
+async def edit_data_kb(f_name, date, time, num_of_people) -> InlineKeyboardMarkup:
     """
     Клавиатура редактирования данных пользователя
     :return: InlineKeyboardMarkup
@@ -44,9 +44,6 @@ async def edit_data_kb(f_name, l_name, date, time, num_of_people) -> InlineKeybo
         inline_keyboard=[
             [
                 InlineKeyboardButton(text=f'Имя -> {f_name}', callback_data='edit_fname')
-            ],
-            [
-                InlineKeyboardButton(text=f'Фамилия -> {l_name}', callback_data='edit_lname')
             ],
             [
                 InlineKeyboardButton(text=f'Дата -> {date}', callback_data='edit_date')
@@ -107,6 +104,20 @@ async def edit_choice_ppl_kb(target: str) -> InlineKeyboardMarkup:
             ],
             [
                 InlineKeyboardButton(text='Назад', callback_data=target)
+            ]
+        ]
+    )
+
+
+async def confirm_user_name_kb() -> InlineKeyboardMarkup:
+    return InlineKeyboardMarkup(
+        inline_keyboard=[
+            [
+                InlineKeyboardButton(text='Нет', callback_data='enter_user_name'),
+                InlineKeyboardButton(text='Да', callback_data='use_default_name')
+            ],
+            [
+                InlineKeyboardButton(text='Назад', callback_data='booking')
             ]
         ]
     )

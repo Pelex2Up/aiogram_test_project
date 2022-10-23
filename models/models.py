@@ -11,7 +11,6 @@ class UsersBooking(Base):
 
     id = Column(Integer, primary_key=True)
     f_name = Column(Text, nullable=True)
-    l_name = Column(Text, nullable=True)
     date = Column(Text, nullable=False)
     time = Column(Text, nullable=True)
     num_of_people = Column(Integer, nullable=True)

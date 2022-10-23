@@ -1,6 +1,7 @@
 from aiogram import Bot, Dispatcher
 from aiogram.types import ParseMode
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
+from inline_timepicker.inline_timepicker import InlineTimepicker
 
 from config import CONFIG
 
