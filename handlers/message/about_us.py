@@ -8,8 +8,9 @@ from loader import dp
 
 @dp.callback_query_handler(lambda x: x.data == 'about_us')
 async def about_us(callback_query: types.CallbackQuery):
-    await callback_query.message.edit_text(text=f"Что вы хотели бы узнать про нас?",
-                                           reply_markup=await about_us_kb())
+    await callback_query.message.delete()
+    await callback_query.message.answer(text=f"Что вы хотели бы узнать про нас?",
+                                        reply_markup=await about_us_kb())
 
 
 @dp.callback_query_handler(lambda x: x.data == 'phone_number')

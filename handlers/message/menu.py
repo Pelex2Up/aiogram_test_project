@@ -20,10 +20,11 @@ async def start_food_menu(callback_query: types.CallbackQuery, state: FSMContext
     name = get_food.food_name
     price = get_food.food_price
     if get_food:
-        await callback_query.message.edit_text(text=f"{hide_link(food_photo)}\n"
+        await callback_query.message.delete()
+        await callback_query.message.answer(text=f"{hide_link(food_photo)}\n"
                                                     f'<b>{name}</b>\n\n{price}',
-                                               reply_markup=await menu_kb(),
-                                               parse_mode=ParseMode.HTML)
+                                            reply_markup=await menu_kb(),
+                                            parse_mode=ParseMode.HTML)
 
 
 @dp.callback_query_handler(lambda x: x.data == 'options', state=MenuStates)

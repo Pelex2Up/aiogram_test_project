@@ -17,9 +17,10 @@ from aiogram_timepicker.panel import FullTimePicker, full_timep_callback
 
 @dp.callback_query_handler(lambda x: x.data == 'booking')
 async def booking(callback_query: types.CallbackQuery):
-    await callback_query.message.edit_text(text=f"Бронирование осуществляется за сутки. Максимальное количество человек"
-                                                f" за один стол: 6.",
-                                           reply_markup=await booking_kb())
+    await callback_query.message.delete()
+    await callback_query.message.answer(text=f"Бронирование осуществляется за сутки. Максимальное количество человек"
+                                             f" за один стол: 6.",
+                                        reply_markup=await booking_kb())
 
 
 @dp.callback_query_handler(lambda x: x.data == 'cancel', state='*')

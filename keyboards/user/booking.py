@@ -117,7 +117,7 @@ async def confirm_user_name_kb() -> InlineKeyboardMarkup:
                 InlineKeyboardButton(text='Да', callback_data='use_default_name')
             ],
             [
-                InlineKeyboardButton(text='Назад', callback_data='booking')
+                InlineKeyboardButton(text='Назад', callback_data='cancel')
             ]
         ]
     )
