@@ -1,11 +1,11 @@
 from aiogram.types import InlineKeyboardButton
 
 
-def function_replace_default(callback, seconds, minutes, hours):
+def function_replace_default(callback, minutes, hours):
     async def function_create_minute_time_button(timepicker, minute_curr, minute):
         label = timepicker.minute_format.format(minute) if minute_curr != minute else \
             timepicker.minute_current_format.format(minute)
-        callback_data = callback.new('CHANGE', hours, minute, seconds)
+        callback_data = callback.new('CHANGE', hours, minute)
         return InlineKeyboardButton(
             label,
             callback_data=callback_data
@@ -14,21 +14,21 @@ def function_replace_default(callback, seconds, minutes, hours):
     async def function_create_minute_group_button(timepicker, minute_current, minute_from, minute_to):
         label = '{0:02} - {1:02}'.format(minute_from, minute_to)
         callback_data = callback.new('GRP_MIN', hours, '{0}-{1}-{2}'.format(
-            minute_current, minute_from, minute_to), seconds)
+            minute_current, minute_from, minute_to))
         return InlineKeyboardButton(
             label,
             callback_data=callback_data
         )
 
     async def function_create_minute_back_button(timepicker):
-        callback_data = callback.new('GRP_MIN_MENU', hours, 0, seconds)
+        callback_data = callback.new('GRP_MIN_MENU', hours, 0)
         return InlineKeyboardButton(
             timepicker.label_back,
             callback_data=callback_data,
         )
 
     async def function_create_minute_cancel_button(timepicker):
-        callback_data = callback.new('CHANGE', hours, minutes, seconds)
+        callback_data = callback.new('CHANGE', hours, minutes)
         return InlineKeyboardButton(
             timepicker.label_cancel,
             callback_data=callback_data,

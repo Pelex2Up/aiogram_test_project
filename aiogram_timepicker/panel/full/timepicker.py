@@ -142,7 +142,7 @@ class TimePicker:
             kb = await minute.TimePicker(self.interval // 60 if self.interval >= 60 else 1, self.callback)\
                 .change_default_action(
                 **adapter.minute.function_replace_default(
-                    self.callback, minutes, hours)
+                    self.callback, minutes=minutes, hours=hours)
             ).start_picker(minutes)
             await query.message.edit_reply_markup(kb)
             return result.Result(
